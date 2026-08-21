@@ -17,6 +17,7 @@ htmlcov/
 # Models, caches, and experiment outputs
 artifacts/**
 !artifacts/README.md
+data/train/curated/
 models/
 checkpoints/
 *.safetensors

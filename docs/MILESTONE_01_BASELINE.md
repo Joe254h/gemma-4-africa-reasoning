@@ -6,7 +6,8 @@ Measure Gemma 4 E2B before any adaptation on matched English, French, Swahili, a
 
 ## Required evidence
 
-- [ ] HPC audit identifies the GPU model, VRAM, CUDA build, Slurm partition, and GPU request syntax.
+- [x] Login-node and node05 audits confirm that the current Slurm cluster exposes no GPU.
+- [ ] Kaggle audit records both T4 models, VRAM, driver, CUDA build, and package versions.
 - [ ] `google/gemma-4-E2B-it` loads at the pinned revision.
 - [ ] Thinking mode produces separate `thinking` and final `content` fields.
 - [ ] A four-sample smoke run completes: one matched problem per language.
@@ -44,4 +45,6 @@ This milestone establishes the “before” measurement. It does not claim impro
 
 ## Current unanswered question
 
-Which GPU type and exact Slurm `--partition`/`--gres` values are available to the `njoel` account on the ICPAC CLIMSA HPC? The repository includes the audit commands, but only the cluster can provide this answer.
+Can the ICPAC administrator provide `njoel` access to a separate GPU-enabled Slurm
+partition? The current `serial` and `parallel` inventories contain no GPU GRES, so
+milestone 1 will use the documented Kaggle T4 x2 path unless cluster access changes.

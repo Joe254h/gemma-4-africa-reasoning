@@ -4,7 +4,7 @@
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-green.svg)](LICENSE)
 
-A reproducible research project for measuring and improving on-device reasoning in English, French, Swahili, and Wolof. The first milestone is deliberately narrow: establish an auditable **zero-shot Gemma 4 E2B baseline with thinking enabled before any fine-tuning**.
+A reproducible research project for measuring and improving on-device reasoning in English, French, Swahili, and Wolof. Milestone 1 establishes an auditable **zero-shot Gemma 4 E2B baseline with thinking enabled before any fine-tuning**. Milestone 2 adds a human-validated Unsloth QLoRA/rsLoRA adaptation for Kaggle T4 x2 and evaluates it on the unchanged benchmark.
 
 ## Why this project matters
 
@@ -29,7 +29,8 @@ The baseline uses:
 - human review fields for reasoning correctness and language compliance;
 - run manifests containing code, model, dataset, package, hardware, and generation provenance.
 
-No LoRA/QLoRA training is included in this milestone. Training begins only after the baseline and evaluation protocol are frozen.
+Training begins only after the baseline and evaluation protocol are frozen. The advanced
+adapter protocol is described in [the low-resource stack](docs/ADVANCED_LOW_RESOURCE_STACK.md).
 
 ## Repository map
 
@@ -38,6 +39,7 @@ configs/                 Experiment configuration
 data/eval/               Generated, provenance-rich evaluation files
 docs/                    Protocol, decisions, HPC runbook, and project pitch
 scripts/hpc/             Cluster audit, environment, and Slurm submission helpers
+scripts/kaggle/          Deterministic dual-T4 baseline, training, and adapter evaluation
 slurm/                   Compute-node job definitions
 src/afri_reasoning/      Dataset, inference, validation, scoring, and review code
 tests/                   Fast tests that do not download a model
@@ -77,6 +79,11 @@ bash scripts/hpc/submit_baseline.sh full
 
 The exact procedure, expected files, failure checks, and copy-back commands are in [the HPC runbook](docs/HPC_RUNBOOK.md).
 The evidence required to reproduce a reported number is defined in [the reproducibility contract](docs/REPRODUCIBILITY.md).
+
+If the HPC audit reports no Slurm-accessible GPU, use the [Kaggle T4 x2
+runbook](docs/KAGGLE_RUNBOOK.md). Its two workers keep all four language variants of a
+matched problem together, write independently resumable shards, and validate exact
+evaluation coverage before producing one merged report.
 
 ## Local developer checks
 
@@ -132,4 +139,8 @@ artifacts/baseline/<run-id>/
 
 ## Current status
 
-Milestone 1 implementation is ready for the HPC GPU audit and first smoke run. See [the milestone checklist](docs/MILESTONE_01_BASELINE.md) for the acceptance criteria.
+The implementation is code-ready, but no result is claimed yet. The audited HPC
+partitions are CPU-only, so GPU execution is routed to Kaggle T4 x2. Complete
+[Milestone 1](docs/MILESTONE_01_BASELINE.md), then follow the
+[Milestone 2 checklist](docs/MILESTONE_02_ADAPTATION.md) and the
+[Kaggle runbook](docs/KAGGLE_RUNBOOK.md).

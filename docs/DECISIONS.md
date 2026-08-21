@@ -47,3 +47,34 @@
 **Decision:** Save raw and parsed thoughts locally but ignore run artifacts in Git.
 
 **Reason:** They are needed for the assignment's reasoning evaluation, but they may be large, sensitive, or misleading when published without review.
+
+## ADR-009 - Separate CPU data work from GPU model execution
+
+**Decision:** Use the ICPAC CLIMSA HPC for data preparation, validation, checksums, and
+reporting. Run the Gemma 4 baseline on Kaggle T4 x2 unless a Slurm-accessible GPU is
+subsequently provisioned.
+
+**Reason:** Audits on the login node and Slurm job 4127 on node05 on 2026-08-21 showed
+`Gres=(null)`, no `gres/gpu` in `CfgTRES`, no `nvidia-smi`, and no CUDA toolkit. CPU
+capacity does not make adapter training or the official GPU baseline practical. The
+alternative two-GPU runner preserves matched problems, provenance, and resumability.
+
+## ADR-010 - Use one advanced primary adapter, then ablate
+
+**Decision:** The first adapted run uses 4-bit QLoRA, rsLoRA, response-only loss, and a
+text-only Unsloth adapter. DoRA, NEFTune, preference optimization, reinforcement
+learning, synthetic augmentation, and deployment quantization remain separate gated
+experiments.
+
+**Reason:** Combining every technique would obscure the cause of both gains and failures.
+Low-resource results are more credible when data quality and one controlled intervention
+take priority over a long feature list.
+
+## ADR-011 - Treat the first before/after result as a system comparison
+
+**Decision:** Compare the official zero-shot model and adapted 4-bit stack, but do not
+attribute the entire delta to training unless a matched Unsloth 4-bit zero-shot control
+is also run.
+
+**Reason:** Quantization and the inference runtime change alongside the adapter. A matched
+control is required to separate adapter improvement from those effects.

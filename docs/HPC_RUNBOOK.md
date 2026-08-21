@@ -53,6 +53,12 @@ cat logs/audit-JOB_ID.err
 
 Stop here if the compute-node log does not show an NVIDIA GPU.
 
+If every node reports `Gres=(null)`, `CfgTRES` contains no `gres/gpu`, and a
+compute-node audit cannot find `nvidia-smi`, the cluster has no Slurm-accessible GPU.
+Do not submit the baseline job or attempt QLoRA on CPU. Use the cluster for dataset
+preparation, validation, checksums, and reporting, then use the documented Kaggle T4 x2
+workflow for model inference and training experiments.
+
 ## 3. Create the environment
 
 If your cluster uses environment modules, load the recommended Python/CUDA module first. Then:

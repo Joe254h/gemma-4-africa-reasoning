@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
+slurm_inventory_available=false
+gpu_resources_configured=false
+gpu_visible=false
+
 section() {
   printf '\n### %s\n' "$1"
 }
@@ -28,13 +32,19 @@ fi
 
 section "Configured GPU resources"
 if command -v scontrol >/dev/null 2>&1; then
-  scontrol show nodes | grep -E 'NodeName=|Gres=|CfgTRES=' || true
+  slurm_inventory_available=true
+  node_details="$(scontrol show nodes 2>/dev/null || true)"
+  printf '%s\n' "${node_details}" | grep -E 'NodeName=|Gres=|CfgTRES=' || true
+  if printf '%s\n' "${node_details}" | grep -Eqi 'Gres=.*gpu|CfgTRES=.*gres/gpu'; then
+    gpu_resources_configured=true
+  fi
 else
   echo "scontrol not found"
 fi
 
 section "Visible NVIDIA devices"
 if command -v nvidia-smi >/dev/null 2>&1; then
+  gpu_visible=true
   nvidia-smi
   nvidia-smi --query-gpu=index,name,uuid,memory.total,driver_version \
     --format=csv,noheader
@@ -79,5 +89,15 @@ else
 fi
 
 section "Audit conclusion"
-echo "For the baseline, repeat this audit inside a Slurm GPU allocation."
-echo "Required evidence: an NVIDIA GPU, sufficient free VRAM, and torch CUDA=True."
+if [[ "${gpu_visible}" == true ]]; then
+  echo "An NVIDIA device is visible. Verify its VRAM and torch CUDA=True before inference."
+elif [[ "${gpu_resources_configured}" == true ]]; then
+  echo "Slurm advertises GPU resources, but none are visible in this job."
+  echo "Repeat the audit inside the correct GPU allocation."
+elif [[ "${slurm_inventory_available}" == true ]]; then
+  echo "No Slurm GPU resource is configured and no NVIDIA device is visible."
+  echo "Do not run the Gemma baseline or QLoRA on this CPU allocation."
+else
+  echo "The script could not inspect Slurm GPU resources or find an NVIDIA device."
+  echo "Ask the cluster administrator for the GPU partition and request syntax."
+fi

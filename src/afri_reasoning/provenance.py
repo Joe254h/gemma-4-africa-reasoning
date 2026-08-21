@@ -25,7 +25,19 @@ def _git_commit(repo_root: Path) -> str | None:
 
 
 def _package_versions() -> dict[str, str | None]:
-    packages = ["torch", "transformers", "accelerate", "datasets", "huggingface-hub", "PyYAML"]
+    packages = [
+        "torch",
+        "transformers",
+        "accelerate",
+        "datasets",
+        "huggingface-hub",
+        "PyYAML",
+        "unsloth",
+        "unsloth_zoo",
+        "trl",
+        "peft",
+        "bitsandbytes",
+    ]
     versions: dict[str, str | None] = {}
     for package in packages:
         try:
