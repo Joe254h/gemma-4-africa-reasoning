@@ -1,0 +1,99 @@
+{
+  "created_at_utc": "2026-08-13T13:25:15.260039+00:00",
+  "dataset_id": "masakhane/afrimgsm",
+  "dataset_revision": "8e4268d2b94941f18f63f694cf48e4ae26fbec65",
+  "evaluation_file": "data/eval/afrimgsm_50x4.jsonl",
+  "evaluation_sha256": "e4345acfd8aac596351e09eb065c3299f98870812ace11218529ee6f7119d8d6",
+  "languages": [
+    "en",
+    "fr",
+    "sw",
+    "wo"
+  ],
+  "loading_method": "pinned-local-tsv",
+  "native_review_policy": {
+    "languages_requiring_project_review": [
+      "sw",
+      "wo"
+    ],
+    "status": "pending"
+  },
+  "problems": 50,
+  "records": 200,
+  "sample_seed": 20260813,
+  "schema_version": "1.0",
+  "selected_source_indices": [
+    10,
+    12,
+    13,
+    27,
+    30,
+    34,
+    35,
+    36,
+    39,
+    47,
+    51,
+    58,
+    62,
+    71,
+    79,
+    91,
+    94,
+    96,
+    102,
+    106,
+    110,
+    113,
+    114,
+    115,
+    123,
+    136,
+    139,
+    140,
+    151,
+    161,
+    167,
+    169,
+    176,
+    181,
+    182,
+    197,
+    202,
+    209,
+    218,
+    220,
+    225,
+    228,
+    231,
+    233,
+    238,
+    240,
+    241,
+    244,
+    245,
+    249
+  ],
+  "source_provenance": {
+    "files": {
+      "en": {
+        "path": "data/eng/test.tsv",
+        "sha256": "1f646f7b36a5af8c60a4de46c212a603dbcc977df2c69b482a3eb83024c34fe0"
+      },
+      "fr": {
+        "path": "data/fra/test.tsv",
+        "sha256": "865e7dc9c1b0df501fedc0eb0d8e51ec1987e5fbb9614827f34d3866355fd3a2"
+      },
+      "sw": {
+        "path": "data/swa/test.tsv",
+        "sha256": "5690941d8aef75a0eddf9bfb659194d9c51ae6d327cb77622f25ebda69958cfc"
+      },
+      "wo": {
+        "path": "data/wol/test.tsv",
+        "sha256": "b294f068a7663c3ccd3311fd89febf669b87a0fea3e220b5ea43610700637e48"
+      }
+    },
+    "git_head": "8e4268d2b94941f18f63f694cf48e4ae26fbec65"
+  },
+  "split": "test"
+}

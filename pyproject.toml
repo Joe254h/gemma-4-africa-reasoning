@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "afri-reasoning"
+version = "0.1.0"
+description = "Reproducible four-language Gemma 4 reasoning evaluation"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+authors = [
+  {name = "Sangura Joel Nyongesa"},
+]
+dependencies = [
+  "PyYAML>=6.0.3,<7",
+]
+
+[project.optional-dependencies]
+baseline = [
+  "accelerate>=1.14,<2",
+  "datasets>=5.0,<6",
+  "huggingface-hub>=1.27,<2",
+  "torch>=2.5",
+  "transformers>=5.10.1,<6",
+]
+dev = [
+  "pytest>=9.1,<10",
+  "ruff>=0.12",
+]
+
+[project.scripts]
+afri-reasoning = "afri_reasoning.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+exclude = ["artifacts", "data/eval"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

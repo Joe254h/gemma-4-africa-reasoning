@@ -1,0 +1,55 @@
+project:
+  name: gemma-4-africa-reasoning
+  milestone: zero-shot-baseline-v1
+
+model:
+  id: google/gemma-4-E2B-it
+  revision: 3e22461f65e89153144f8adb70e3b8c2cc9845a7
+  enable_thinking: true
+  dtype: auto
+  device_map: auto
+
+dataset:
+  id: masakhane/afrimgsm
+  revision: 8e4268d2b94941f18f63f694cf48e4ae26fbec65
+  split: test
+  sample_size_per_language: 50
+  sample_seed: 20260813
+  languages:
+    en:
+      dataset_config: eng
+      name: English
+    fr:
+      dataset_config: fra
+      name: French
+    sw:
+      dataset_config: swa
+      name: Swahili
+    wo:
+      dataset_config: wol
+      name: Wolof
+
+prompt:
+  system_template: >-
+    You are taking part in a multilingual mathematical reasoning evaluation.
+    Think through the problem carefully and answer entirely in {language_name}.
+    Keep the reasoning in the model's thinking channel. Give a short final-answer
+    sentence in {language_name} and end it with the numeric answer. Do not switch
+    to English unless the requested language is English.
+
+generation:
+  do_sample: false
+  max_new_tokens: 2048
+  seed: 20260813
+
+paths:
+  evaluation_file: data/eval/afrimgsm_50x4.jsonl
+  evaluation_manifest: data/eval/afrimgsm_50x4.manifest.json
+  artifacts_dir: artifacts/baseline
+
+quality_gates:
+  required_languages: [en, fr, sw, wo]
+  require_matched_problem_ids: true
+  require_equal_reference_answers: true
+  require_thinking_content: true
+  human_review_languages: [sw, wo]

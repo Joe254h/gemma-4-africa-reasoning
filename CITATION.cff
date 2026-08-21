@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+title: "Gemma 4 African Multilingual Reasoning"
+message: "If you use this evaluation framework, please cite this software."
+type: software
+authors:
+  - family-names: "Nyongesa"
+    given-names: "Sangura Joel"
+repository-code: "https://github.com/Joe254h/gemma-4-africa-reasoning"
+license: Apache-2.0
+version: 0.1.0
+date-released: 2026-08-13

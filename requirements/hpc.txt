@@ -1,0 +1,8 @@
+# Baseline dependencies pinned on 2026-08-13.
+# Install a CUDA-compatible PyTorch build before this file when your cluster
+# requires a specific CUDA wheel or module.
+accelerate==1.14.0
+datasets==5.0.1
+huggingface-hub==1.27.0
+PyYAML==6.0.3
+transformers==5.15.0
