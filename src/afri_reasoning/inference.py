@@ -1,16 +1,22 @@
 from __future__ import annotations
 
 import time
+from pathlib import Path
 from typing import Any
 
 
 class GemmaThinkingRunner:
     """Single-GPU Gemma 4 runner that preserves parsed thinking and final content."""
 
-    def __init__(self, config: dict[str, Any], *, local_files_only: bool = False) -> None:
+    def __init__(
+        self,
+        config: dict[str, Any],
+        *,
+        local_files_only: bool = False,
+        adapter_dir: str | Path | None = None,
+    ) -> None:
         try:
             import torch
-            from transformers import AutoModelForMultimodalLM, AutoProcessor, set_seed
         except ImportError as exc:
             raise RuntimeError(
                 "Inference requires PyTorch and the baseline dependencies. "
@@ -26,20 +32,44 @@ class GemmaThinkingRunner:
         self.torch = torch
         self.config = config
         model_config = config["model"]
-        set_seed(int(config["generation"]["seed"]))
 
-        self.processor = AutoProcessor.from_pretrained(
-            model_config["id"],
-            revision=model_config["revision"],
-            local_files_only=local_files_only,
-        )
-        self.model = AutoModelForMultimodalLM.from_pretrained(
-            model_config["id"],
-            revision=model_config["revision"],
-            dtype=model_config.get("dtype", "auto"),
-            device_map=model_config.get("device_map", "auto"),
-            local_files_only=local_files_only,
-        )
+        if adapter_dir is None:
+            from transformers import AutoModelForMultimodalLM, AutoProcessor, set_seed
+
+            set_seed(int(config["generation"]["seed"]))
+            self.processor = AutoProcessor.from_pretrained(
+                model_config["id"],
+                revision=model_config["revision"],
+                local_files_only=local_files_only,
+            )
+            self.model = AutoModelForMultimodalLM.from_pretrained(
+                model_config["id"],
+                revision=model_config["revision"],
+                dtype=model_config.get("dtype", "auto"),
+                device_map=model_config.get("device_map", "auto"),
+                local_files_only=local_files_only,
+            )
+        else:
+            try:
+                from unsloth import FastVisionModel, get_chat_template
+            except ImportError as exc:
+                raise RuntimeError(
+                    "Adapter evaluation requires requirements/kaggle-unsloth.txt"
+                ) from exc
+            from transformers import set_seed
+
+            set_seed(int(config["generation"]["seed"]))
+            adapter_path = Path(adapter_dir).expanduser().resolve()
+            self.model, self.processor = FastVisionModel.from_pretrained(
+                model_name=str(adapter_path),
+                max_seq_length=4096,
+                load_in_4bit=True,
+                dtype=torch.float16,
+                device_map={"": 0},
+                local_files_only=local_files_only,
+            )
+            self.processor = get_chat_template(self.processor, "gemma-4")
+            FastVisionModel.for_inference(self.model)
         self.model.eval()
 
     def generate(self, sample: dict[str, Any]) -> dict[str, Any]:
@@ -69,7 +99,12 @@ class GemmaThinkingRunner:
         generated_ids = outputs[0][input_length:]
         raw_response = self.processor.decode(generated_ids, skip_special_tokens=False)
         parsed, parse_error = self._parse_response(raw_response, inputs["input_ids"])
-        thinking = str(parsed.get("thinking") or "").strip()
+        thinking = str(
+            parsed.get("thinking")
+            or parsed.get("reasoning")
+            or parsed.get("reasoning_content")
+            or ""
+        ).strip()
         content = str(parsed.get("content") or parsed.get("answer") or "").strip()
 
         return {

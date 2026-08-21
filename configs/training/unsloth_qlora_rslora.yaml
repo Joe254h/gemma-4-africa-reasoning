@@ -1,0 +1,93 @@
+project:
+  name: gemma-4-africa-reasoning
+  experiment: unsloth-qlora-rslora-v1
+  protocol_version: "1.0"
+
+model:
+  id: unsloth/gemma-4-E2B-it
+  revision: d36bdd3855c82a6a1a23f7c459b749f5724ae75d
+  reference_base_id: google/gemma-4-E2B-it
+  reference_base_revision: 3e22461f65e89153144f8adb70e3b8c2cc9845a7
+  max_seq_length: 2048
+  load_in_4bit: true
+  dtype: float16
+  gradient_checkpointing: unsloth
+  enable_thinking: true
+
+dataset:
+  id: HuggingFaceH4/Multilingual-Thinking
+  revision: d57770a279da10d30be4845451a499aef8caf5b9
+  schema_version: "1.0"
+  languages: [en, fr, sw, wo]
+  target_train_records: 1200
+  target_validation_fraction: 0.10
+
+adapter:
+  method: qlora
+  rank: 32
+  alpha: 32
+  dropout: 0.0
+  bias: none
+  # Let Unsloth derive text-only modules from the finetune_* switches below.
+  # `all-linear` also selects the multimodal tower in current Unsloth releases.
+  target_modules: null
+  use_rslora: true
+  use_dora: false
+  finetune_vision_layers: false
+  finetune_language_layers: true
+  finetune_attention_modules: true
+  finetune_mlp_modules: true
+
+training:
+  num_train_epochs: 3
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 0.0002
+  weight_decay: 0.001
+  warmup_ratio: 0.05
+  lr_scheduler_type: cosine
+  optim: adamw_8bit
+  max_grad_norm: 0.3
+  logging_steps: 1
+  eval_steps: 25
+  save_steps: 25
+  save_total_limit: 2
+  load_best_model_at_end: true
+  early_stopping_patience: 2
+  seed: 20260813
+  data_seed: 20260813
+  fp16: true
+  bf16: false
+  tf32: false
+  group_by_length: true
+  neftune_noise_alpha: null
+  report_to: none
+
+runtime:
+  launcher: torchrun
+  distributed_strategy: ddp
+  required_gpu_count: 2
+  expected_gpu_name_pattern: "T4"
+  minimum_vram_gib: 14.0
+  ddp_backend: nccl
+  ddp_find_unused_parameters: false
+  dataloader_num_workers: 2
+
+paths:
+  train_file: data/train/curated/train.jsonl
+  validation_file: data/train/curated/validation.jsonl
+  evaluation_file: data/eval/afrimgsm_50x4.jsonl
+  output_dir: artifacts/training/unsloth-qlora-rslora-v1
+
+quality_gates:
+  required_languages: [en, fr, sw, wo]
+  human_review_languages: [sw, wo]
+  require_parallel_groups: true
+  require_target_size: true
+  minimum_records_per_language: 1
+  maximum_language_imbalance_ratio: 1.0
+  require_completed_baseline: true
+  reject_overlength_records: true
+  response_only_loss: true
+  forbid_evaluation_leakage: true
